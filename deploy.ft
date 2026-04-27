@@ -1,0 +1,31 @@
+resource "null_resource" "deploy_minitwit_stack" {
+
+  triggers = {
+    stack_hash = filesha256("stack/minitwit_stack.yml")
+  }
+
+  provisioner "file" {
+    source      = "stack/minitwit_stack.yml"
+    destination = "/root/minitwit_stack.yml"
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = "157.230.30.175"
+      private_key = file(var.pvt_key)
+    }
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "root"
+      host        = "157.230.30.175"
+      private_key = file(var.pvt_key)
+    }
+
+    inline = [
+      "docker stack deploy -c /root/minitwit_stack.yml minitwit"
+    ]
+  }
+}
